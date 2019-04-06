@@ -110,6 +110,12 @@ module.exports = function VASTPlugin(options) {
 
     disable: function () {
       settings.adsEnabled = false;
+    },
+
+    resize: function(width, height, isFullscreen) {
+      if (player.vast && player.vast.adUnit) {
+        player.vast.adUnit.resizeAd(width, height, isFullscreen);
+      }
     }
   };
 

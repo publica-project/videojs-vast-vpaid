@@ -82,3 +82,12 @@ div.vast-skip-button {
 .vjs-ad-playing  .vjs-live-controls{
   display: none;
 }
+
+.vjs-ad-playing.vjs-fullscreen .vjs-tech {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}

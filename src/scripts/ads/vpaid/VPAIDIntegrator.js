@@ -57,6 +57,7 @@ VPAIDIntegrator.prototype.playAd = function playVPaidAd(vastResponse, callback) 
   callback = callback || utilities.noop;
 
   this._adUnit = null;
+  this.WrappedAdUnit = null;
 
   dom.addClass(player.el(), 'vjs-vpaid-ad');
 
@@ -94,6 +95,12 @@ VPAIDIntegrator.prototype.playAd = function playVPaidAd(vastResponse, callback) 
       },
       getSrc: function() {
         return tech.mediaFile;
+      },
+      resizeAd: function(width, height, isFullscreen) {
+        if (that.WrappedAdUnit) {
+          that.WrappedAdUnit.resizeAd(width, height, isFullscreen ? that.VIEW_MODE.FULLSCREEN : that.VIEW_MODE.NORMAL, logError);
+          resizeAdContainer(player, width, height);
+        }
       }
     };
 
@@ -119,6 +126,7 @@ VPAIDIntegrator.prototype.playAd = function playVPaidAd(vastResponse, callback) 
   }
 
   function removeAdUnit() {
+    that.WrappedAdUnit = null;
     if (tech) {
       tech.unloadAdUnit();
     }
@@ -179,7 +187,7 @@ VPAIDIntegrator.prototype._loadAdUnit = function (tech, vastResponse, next) {
     }
 
     try {
-      var WrappedAdUnit = that._createVPAIDAdUnitWrapper(adUnit, tech.mediaFile.src, responseTimeout);
+      var WrappedAdUnit = that.WrappedAdUnit = that._createVPAIDAdUnitWrapper(adUnit, tech.mediaFile.src, responseTimeout);
       var techClass = 'vjs-' + tech.name + '-ad';
       dom.addClass(player.el(), techClass);
       player.one('vpaid.adEnd', function() {
@@ -552,11 +560,32 @@ VPAIDIntegrator.prototype._trackError = function trackError(response, errorCode)
   vastUtil.track(response.errorURLMacros, {ERRORCODE: errorCode || 901});
 };
 
+function resizeAdContainer(player, width, height) {
+  try {
+    // hack to overlay container on ad
+    var win = player.el()
+      .querySelector('.VPAID-container iframe')
+      .contentWindow;
+    if (!win.$cover) {
+      win.$cover = true
+      var st = document.createElement('style');
+      st.innerHTML = '.ad-element { position: absolute !important; top: 50% !important; left: 50% !important; -webkit-transform: translate(-50%, -50%) !important; -ms-transform: translate(-50%, -50%) !important; transform: translate(-50%, -50%) !important; }';
+      win.document.head.appendChild(st);
+    }
+    var el = win.document.querySelector('.ad-element');
+    el.style.width = width + 'px';
+    el.style.height = height + 'px';
+  } catch (e) {
+    // noop
+  }
+}
+
 function resizeAd(player, adUnit, VIEW_MODE) {
   var tech = player.el().querySelector('.vjs-tech');
   var dimension = dom.getDimension(tech);
   var MODE = player.isFullscreen() ? VIEW_MODE.FULLSCREEN : VIEW_MODE.NORMAL;
   adUnit.resizeAd(dimension.width, dimension.height, MODE, logError);
+  resizeAdContainer(player, dimension.width, dimension.height);
 }
 
 function logError(error) {
