@@ -567,9 +567,18 @@ function resizeAdContainer(player, width, height) {
       .querySelector('.VPAID-container iframe')
       .contentWindow;
     if (!win.$cover) {
-      win.$cover = true
+      win.$cover = true;
       var st = document.createElement('style');
-      st.innerHTML = '.ad-element { position: absolute !important; top: 50% !important; left: 50% !important; -webkit-transform: translate(-50%, -50%) !important; -ms-transform: translate(-50%, -50%) !important; transform: translate(-50%, -50%) !important; }';
+      st.innerHTML = '.ad-element {' +
+        [
+          'position: absolute',
+          'top: 50%',
+          'left: 50%',
+          '-webkit-transform: translate(-50%, -50%)',
+          '-ms-transform: translate(-50%, -50%)',
+          'transform: translate(-50%, -50%)',
+        ].join(' !important;') +
+        '}';
       win.document.head.appendChild(st);
     }
     var el = win.document.querySelector('.ad-element');
