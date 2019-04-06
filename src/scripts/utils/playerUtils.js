@@ -118,6 +118,9 @@ playerUtils.restorePlayerSnapshot = function restorePlayerSnapshot(player, snaps
    * restoration is required
    */
   function hasSrcChanged(player, snapshot) {
+    if (player.techGet_ && player.techGet_('src')) {
+      return player.techGet_('src') !== snapshot.src;
+    }
     if (player.src()) {
       return player.src() !== snapshot.src;
     }
